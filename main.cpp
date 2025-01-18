@@ -8,6 +8,10 @@
 
 
 int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Usage: %s\n <q>", argv[0]);
+        return 1;
+    }
     struct ifaddrs *myaddrs;
     char buf[64], local_ip[16];
     local_ip[0] = '\0';
