@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     local_ip[0] = '\0';
     if(getifaddrs(&myaddrs) != 0) {
         perror("getifaddrs");
-        exit(1);
+        return 1;
     }
     for (auto ptr = myaddrs; ptr != NULL; ptr = ptr->ifa_next) {
         if (ptr->ifa_addr->sa_family == AF_INET) {   
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    const std::string request = "GET /api/dynamicURL/?ip=" + std::string(local_ip) + "&q=" + argv[1] + " HTTP/1.1\r\nHost: ipv4.cloudns.net\r\n\r\n";;
+    const std::string request = "GET /api/dynamicURL/?ip=" + std::string(local_ip) + "&q=" + argv[1] + " HTTP/1.1\r\nHost: ipv4.cloudns.net\r\n\r\n";
 
     if (send(socket_desc, request.c_str(), request.size(), 0) < 0){
         printf("failed to send request...\n");
