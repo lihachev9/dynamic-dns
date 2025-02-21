@@ -1,11 +1,54 @@
-#include <stdio.h>
-#include <arpa/inet.h>
-#include <ifaddrs.h>
+#include <cstdio>
+#include <cstring>
 #include <netdb.h>
-#include <string.h>
-#include <string>
 #include <unistd.h>
+#include <ifaddrs.h>
+#include <arpa/inet.h>
 
+// Вспомогательная функция для вычисления длины строки
+template<typename T>
+size_t calculate_length(T arg) {
+    return strlen(arg);
+}
+
+// Рекурсивная функция для вычисления общей длины всех строк
+template<typename T, typename... Args>
+size_t calculate_length(T first, Args... args) {
+    return strlen(first) + calculate_length(args...);
+}
+
+// Базовый случай: когда аргументов больше нет, просто завершаем строку
+void concatenate_impl(char* result) {
+    // Ничего не делаем, просто завершаем рекурсию
+}
+
+char* mystrcat(char* dest, const char* src) {
+     while (*dest) dest++;
+     while (*dest++ = *src++);
+     return --dest;
+}
+
+// Рекурсивная функция для конкатенации строк
+template<typename T, typename... Args>
+void concatenate_impl(char* result, T first, Args ... args) {
+    result = mystrcat(result, first); // Добавляем текущую строку
+    concatenate_impl(result, args...); // Рекурсивно обрабатываем оставшиеся аргументы
+}
+
+// Основная функция для конкатенации
+template<typename... Args>
+char* concatenate(Args... args) {
+    // Вычисляем общую длину всех строк + 1 для нулевого символа
+    size_t total_length = calculate_length(args...) + 1;
+    // Выделяем память под результирующую строку
+    char* result = new char[total_length];
+    result[0] = '\0'; // Инициализируем пустую строку
+
+    // Конкатенируем строки
+    concatenate_impl(result, args...);
+
+    return result;
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -65,9 +108,9 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    const std::string request = "GET /api/dynamicURL/?ip=" + std::string(local_ip) + "&q=" + argv[1] + " HTTP/1.1\r\nHost: ipv4.cloudns.net\r\n\r\n";
+    const auto request = concatenate("GET /api/dynamicURL/?ip=", local_ip, "&q=", argv[1], " HTTP/1.1\r\nHost: ipv4.cloudns.net\r\n\r\n");
 
-    if (send(socket_desc, request.c_str(), request.size(), 0) < 0){
+    if (send(socket_desc, request, strlen(request) + 1, 0) < 0){
         printf("failed to send request...\n");
         close(socket_desc);
         return 0;
